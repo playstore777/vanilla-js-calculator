@@ -1,4 +1,4 @@
-// Since Objects are not primitive types if they change then the things pointing to it will also see the changes!
+// Since 'Objects' are not primitive types if they change then the things pointing to it will also see the changes!
 let state = {
     'leftOp': '',
     'op': '',
@@ -26,22 +26,20 @@ function buttonClick() {
         equalsTo();
         return;
     }
+    else if (this.id === 'backspace') {
+        backspace();
+        return;
+    }
     calculator(this.id);
 }
 
 function calculator(input) {
     assign(input);
-    display.textContent = state.display;
 }
 
 function assign(input) {
-    let ops = ['+', '-', 'x', '÷'];
+    let ops = ['+', '-', '*', '/'];
     if (ops.includes(input)) {
-        if (input === '*') {
-            input = 'x';
-        } else if (input === '/') {
-            input = '÷';
-        }
         if (state.isExpression) {
             state.buffer = input;
             operator();
@@ -56,12 +54,12 @@ function assign(input) {
         state.leftOp += input;
         state.isExpression = false;
     }
-    setDisplay();
-
+    setDisplay(`${state.leftOp}${state.op}${state.rightOp}`);
 }
 
-function setDisplay() {
-    state.display = `${state.leftOp}${state.op}${state.rightOp}`;
+function setDisplay(value) {
+    state.display = value;
+    display.textContent = state.display;
 }
 
 function operator() {
@@ -72,58 +70,51 @@ function operator() {
         case '-':
             subtract();
             break;
-        case 'x':
+        case '*':
             multiply();
             break;
-        case '÷':
+        case '/':
             divide();
             break;
         default:
             state.display = 'please enter a valid expression';
             break;
     }
+    state = { 
+        ...state,
+        'leftOp': `${state.result}`,
+        'op': `${state.buffer}`,
+        'buffer': '',
+        'rightOp': '',
+        'isExpression': false,
+    };
+    setDisplay(`${state.result}${state.op}`);
 }
 
 const add = () => {
     console.log('add: ', `${parseInt(state.leftOp) + parseInt(state.rightOp)}`);
-    state.result = Number(state.leftOp) + Number(state.rightOp);
-    state.leftOp = `${state.result}`;
-    state.op = state.buffer;
-    state.rightOp = '';
-    state.display = `${state.result}${state.op}`;
+    state.result = Number(state.leftOp) + Number(state.rightOp); //.toFixed(4) would do the job in removing extra values/digits but
+    // in floats it also addeds extra 0000 to all the values. Need to look into this later!!
 }
 
 const subtract = () => {
     state.result = Number(state.leftOp) - Number(state.rightOp);
-    state.leftOp = `${state.result}`;
-    state.op = state.buffer;
-    state.rightOp = '';
-    state.display = `${state.result}${state.op}`;
 }
 
 const multiply = () => {
     state.result = Number(state.leftOp) * Number(state.rightOp);
-    state.leftOp = `${state.result}`;
-    state.op = state.buffer;
-    state.rightOp = '';
-    state.display = `${state.result}${state.op}`;
 }
 
 const divide = () => {
     state.result = Number(state.leftOp) / Number(state.rightOp);
-    state.leftOp = `${state.result}`;
-    state.op = state.buffer;
-    state.rightOp = '';
-    state.display = `${state.result}${state.op}`;
 }
 
-function clear() {
-    state.display = '';
+const clear = () => {
     state.leftOp = '';
     state.op = '';
     state.rightOp = '';
     state.buffer = '';
-    display.textContent = state.display;
+    setDisplay('');
 }
 
 const equalsTo = () => {
@@ -133,151 +124,30 @@ const equalsTo = () => {
         state = { 
             ...state,
             'op': '',
+            'buffer': '',
             'rightOp': '',
-            'result': 0,
             'isExpression': false,
         };
-        display.textContent = state.display;
+        console.log(state);
     }    
 }
 
-// Previous Approach without BackSpace logic:
-// let leftOp = '';
-// let op = '';
-// let rightOp = '';
-// let display = document.querySelector('.display-text');
-// display.textContent = '';
-// let expressionMap = { leftOp, op, rightOp };
-// let buffer = '';
-// const body = document.querySelector('body');
-
-// document.querySelectorAll('button').forEach(
-//     button => button.addEventListener('click', buttonClick)
-// );
-
-// function buttonClick() {
-//     console.log(this.id);
-//     if (this.id === 'clear') {
-//         clear();
-//         return;
-//     } else if(this.id === '=') {
-//         equalsTo();
-//         return;
-//     }
-//     calculator(this.id);
-// }
-
-// function calculator(input) {
-//     // console.log('input: ', input);
-//     expressionMap = assign(input);
-//     // console.log('expressionMap: ', expressionMap);
-//     leftOp = expressionMap.leftOp;
-//     op = expressionMap.op;
-//     rightOp = expressionMap.rightOp;
-//     display.textContent = expressionMapToExpression(expressionMap);
-//     // console.log('display: ', display.textContent);
-// }
-
-// function assign(input) {
-//     let ops = ['+', '-', '*', '/'];
-//     if (ops.includes(input)) {
-//         let isExpression = expressionCheck(leftOp, op, rightOp);
-//         if (isExpression) {
-//             buffer = input;
-//             leftOp = operator(op);
-//             // console.log('leftop: ', leftOp);
-//             return { leftOp, op: '', rightOp: '' };
-//         }
-//         if (input === '*') {
-//             input = 'x';
-//         } else if (input === '/') {
-//             input = '÷';
-//         }
-//         op = input;
-//     } else if (leftOp && op) {
-//         rightOp += input;
-//     } else {
-//         leftOp += input;
-//     }
-//     // console.log('assign: ',leftOp, rightOp, op, input);
-//     return { leftOp, op, rightOp };
-// }
-
-// function expressionCheck(leftOp, op, rightOp) {
-//     // console.log('expressioncheck: ', ((leftOp && op) && rightOp));
-//     return (leftOp && op && rightOp);
-// }
-
-// function expressionMapToExpression(expressionMap) {
-//     let expression = '';
-//     if (expressionMap.leftOp) {
-//         expression += `${expressionMap.leftOp}`;
-//     }
-//     if (expressionMap.op) {
-//         expression += `${expressionMap.op}`;
-//     }
-//     if (expressionMap.rightOp) {
-//         expression += `${expressionMap.rightOp}`;
-//     }
-//     // console.log('expression: ', expression);
-//     return expression;
-// }
-
-// function operator(op) {
-//     let result = '';
-//     // console.log(op);
-//     switch (op) {
-//         case '+':
-//             result = add();
-//             break;
-//         case '-':
-//             result = subtract();
-//             break;
-//         case 'x':
-//             result = multiply();
-//             break;
-//         case '÷':
-//             result = divide();
-//             break;
-//         default:
-//             display.textContent = 'please enter a valid expression';
-//             break;
-//     }
-//     return result;
-// }
-
-// const add = () => {
-//     // console.log('add: ', `${parseInt(leftOp) + parseInt(rightOp)}`);
-//     return `${Number(leftOp) + Number(rightOp)}`;
-// }
-
-// const subtract = () => {
-//     return `${Number(leftOp) - Number(rightOp)}`;
-// }
-
-// const multiply = () => {
-//     return `${Number(leftOp) * Number(rightOp)}`;
-// }
-
-// const divide = () => {
-//     return `${Number(leftOp) / Number(rightOp)}`;
-// }
-
-// const clear = () => {
-//     display.textContent = '';
-//     expressionMap.leftOp = '';
-//     expressionMap.op = '';
-//     expressionMap.rightOp = '';
-//     leftOp = '';
-//     op = '';
-//     rightOp = '';
-// }
-
-// const equalsTo = () => {
-//     leftOp = operator(op);
-//     expressionMap = { leftOp, op: '', rightOp: '' };
-//     leftOp = expressionMap.leftOp;
-//     op = expressionMap.op;
-//     rightOp = expressionMap.rightOp;
-//     display.textContent = expressionMapToExpression(expressionMap);
-// }
+// Naive approach!
+const backspace = () => {
+    let length = state.display.length;
+    setDisplay(state.display.substring(0, length - 1));
+    if (state.isExpression) {
+        length = state.rightOp.length;
+        state.rightOp = state.rightOp.substring(0, length - 1); 
+        if (length - 1 < 1) {
+            state.isExpression = false;
+        }
+    }else if(state.op) {
+        state.op = state.op.substring(0,0);
+    }else if(state.leftOp) {
+        length = state.leftOp.length;
+        state.leftOp = state.leftOp.substring(0, length - 1);
+    }
+    length = undefined;
+    console.log(state);
+}
